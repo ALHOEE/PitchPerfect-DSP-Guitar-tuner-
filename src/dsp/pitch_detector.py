@@ -3,7 +3,7 @@ import numpy as np
 class PitchDetector:
     def __init__(self, sample_rate=44100):
         self.sample_rate = sample_rate
-        # תדרי המיתרים של גיטרה בכיוון סטנדרטי (E2, A2, D3, G3, B3, E4)
+        # Standard guitar string frequencies (E2, A2, D3, G3, B3, E4)
         self.GUITAR_NOTES = [
             {"note": "E2", "freq": 82.41},
             {"note": "A2", "freq": 110.00},
@@ -14,18 +14,18 @@ class PitchDetector:
         ]
 
     def find_pitch(self, audio_data):
-        """מציאת תדר היסוד באמצעות Autocorrelation"""
+        """Calculates the fundamental frequency using the Autocorrelation method."""
         signal = np.frombuffer(audio_data, dtype=np.int16)
         
-        # נרמול האות ובדיקה שאין שקט מוחלט
+        # Noise gate: ignore absolute silence and background noise
         if np.max(np.abs(signal)) < 500:  
             return None, 0.0
 
-        # חישוב מתאם עצמי (Autocorrelation)
+        # Compute the autocorrelation function
         corr = np.correlate(signal, signal, mode='full')
         corr = corr[len(corr)//2:]
 
-        # מציאת נקודת השיא הראשונה אחרי ה-Zero-lag
+        # Find the first prominent peak after the zero-lag region
         d = np.diff(corr)
         start = np.where(d > 0)[0]
         if len(start) == 0:
@@ -35,18 +35,18 @@ class PitchDetector:
         if peak == 0:
             return None, 0.0
 
-        # המרת מיקום השיא לתדר (Hz)
+        # Convert the peak index to frequency (Hz)
         frequency = self.sample_rate / peak
         
-        # סינון רעשי רקע מחוץ לטווח הגיטרה הרלוונטי
+        # Filter out frequencies outside the standard guitar range
         if frequency < 50 or frequency > 400:
             return None, 0.0
 
         return self._match_note(frequency)
 
     def _match_note(self, frequency):
-        """התאמת התדר לתו הקרוב ביותר וחישוב הסטייה"""
+        """Matches the frequency to the closest musical note and calculates the deviation."""
         closest_note = min(self.GUITAR_NOTES, key=lambda x: abs(x["freq"] - frequency))
-        # חישוב סטייה בסנטים (Cents deviation) למדידת דיוק הכיוון
+        # Calculate pitch deviation in Cents for tuning accuracy
         deviation = 1200 * np.log2(frequency / closest_note["freq"])
         return closest_note["note"], deviation
