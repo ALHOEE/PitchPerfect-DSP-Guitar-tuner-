@@ -8,7 +8,7 @@ class AudioStream:
         self.stream = None
 
     def start(self):
-        """פתיחת ערוץ הקלט באמצעות sounddevice המודרנית"""
+        """Initializes and starts the audio input stream using the sounddevice library."""
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
             channels=1,
@@ -18,16 +18,16 @@ class AudioStream:
         self.stream.start()
 
     def read(self):
-        """קריאת חתיכת מידע והמרתה ל-bytes בשביל תאימות מלאה למוח ה-DSP"""
+        """Reads a chunk of audio data and converts it to raw bytes for DSP pipeline compatibility."""
         if self.stream:
-            # קריאת דגימות האודיו כמערך נומרי
+            # Read audio samples as a numeric array
             data, overflow = self.stream.read(self.chunk_size)
-            # המרה לפורמט בייטים גולמי כדי ששאר הפרויקט יעבוד בלי לשנות שורת קוד אחת!
+            # Convert to raw bytes to maintain compatibility with the existing DSP logic
             return data.tobytes()
         return None
 
     def stop(self):
-        """סגירה נקייה של הסטרים"""
+        """Safely stops and closes the audio stream."""
         if self.stream:
             self.stream.stop()
             self.stream.close()
