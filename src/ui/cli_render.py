@@ -8,19 +8,19 @@ class CliRenderer:
         self.console = Console()
 
     def clear(self):
-        """ניקוי המסך ליצירת אפקט של פריים מתעדכן (בלי לגלול למטה)"""
+        """Clears the console to create a seamless frame-update effect without scrolling."""
         os.system('cls' if os.name == 'nt' else 'clear')
 
     def render_tuner(self, note, deviation):
         self.clear()
         
-        # אם אין סיגנל (שקט)
+        # Handle silent state (no signal detected)
         if not note:
             display_text = Text("\n🎸 Pluck a string... 🎸\n", style="bold cyan", justify="center")
             self.console.print(Panel(display_text, title="[bold white]PitchPerfect DSP Tuner[/]", border_style="blue"))
             return
 
-        # מיפוי הסטייה (מטווח של 50- עד 50+) למיקום על פני 11 תווים של מחוג
+        # Map deviation (-50 to +50 cents) to an 11-character gauge string
         pointer_pos = int((deviation + 50) / 10)  
         pointer_pos = max(0, min(10, pointer_pos))
         
@@ -28,7 +28,7 @@ class CliRenderer:
         gauge[pointer_pos] = "🔺"
         gauge_str = "".join(gauge[:5]) + "|" + "".join(gauge[6:])
 
-        # קביעת צבע סטטוס לפי רמת הדיוק (מתחת ל-2 סנט זה מושלם!)
+        # Determine UI status color based on tuning accuracy (<= 2 cents threshold)
         if abs(deviation) < 2:
             color = "bold green"
             status = " PERFECT! IN TUNE "
@@ -39,10 +39,6 @@ class CliRenderer:
             color = "bold red"
             status = " TOO HIGH (Sharp) 🎸"
 
-        # בניית תיבת התצוגה המעוצבת
+        # Construct the formatted UI panel display
         text = Text()
-        text.append(f"\nDetected Note: {note}\n\n", style=f"{color} size=20")
-        text.append(f"[-50c]  {gauge_str}  [+50c]\n\n", style="white")
-        text.append(f"Deviation: {deviation:+.1f} cents | Status: {status}\n", style=color)
-
-        self.console.print(Panel(text, title="[bold white]PitchPerfect DSP Tuner[/]", border_style=color))
+        text.append(f"\nDetected Note: {note}\n\n", style=f"{color}
