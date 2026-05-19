@@ -10,7 +10,7 @@ except:
 class GuiRenderer:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Guitar Tuner - טיונר לגיטרה")
+        self.root.title("PitchPerfect DSP Guitar Tuner")
         self.root.geometry("500x450")
         self.root.configure(bg="#11111b")
         self.root.resizable(False, False)
@@ -22,7 +22,7 @@ class GuiRenderer:
         self.eng_title.pack(pady=(15, 0))
 
         self.main_title = tk.Label(
-            self.root, text="Guitar Tuner - טיונר לגיטרה", 
+            self.root, text="Guitar Tuner", 
             font=("Segoe UI", 20, "bold"), fg="#cdd6f4", bg="#11111b"
         )
         self.main_title.pack(pady=(0, 10))
@@ -71,16 +71,6 @@ class GuiRenderer:
         )
         self.status_label.pack(pady=10)
 
-        self.NOTE_TRANSLATION = {
-            'E': 'E (מי)', 'A': 'A (לה)', 'D': 'D (רה)', 
-            'G': 'G (סול)', 'B': 'B (סי)', 'C': 'C (דו)', 'F': 'F (פה)',
-            'A#': 'A# (לה דיאז)', 'Bb': 'Bb (סי במול)',
-            'C#': 'C# (דו דיאז)', 'Db': 'Db (רה במול)',
-            'D#': 'D# (רה דיאז)', 'Eb': 'Eb (מי במול)',
-            'F#': 'F# (פה דיאז)', 'Gb': 'Gb (סול במול)',
-            'G#': 'G# (סול דיאז)', 'Ab': 'Ab (לה במול)'
-        }
-
     def _draw_marker(self, angle_deg, label, color):
         angle_rad = math.radians(angle_deg)
         x1 = self.cx + (self.radius - 8) * math.cos(angle_rad)
@@ -100,9 +90,8 @@ class GuiRenderer:
             self._move_guitar_needle(90)
             return
 
-        base_note = "".join([c for c in note if not c.isdigit()])
-        display_note = self.NOTE_TRANSLATION.get(base_note, note)
-        self.note_label.config(text=display_note)
+        # Display the raw note (e.g., E2, A2) which is the standard convention
+        self.note_label.config(text=note)
 
         clamped_dev = max(-50, min(50, deviation))
         angle_deg = 90 - (clamped_dev * 1.2)
